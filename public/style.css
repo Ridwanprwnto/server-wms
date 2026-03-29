@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     height: 100%;
 }
 
@@ -8,7 +9,7 @@ body {
     width: 100%;
     display: table;
     font-weight: 100;
-    font-family: 'Karla';
+    font-family: "Karla";
 }
 
 .container {
@@ -31,10 +32,10 @@ body {
 }
 
 .opt a {
-  text-decoration: none;
-  font-size: 150%;
+    text-decoration: none;
+    font-size: 150%;
 }
 
 a:hover {
-  color: red;
+    color: red;
 }
