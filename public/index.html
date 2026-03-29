@@ -1,22 +1,38 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>WMS Server</title>
-        <link href="https://fonts.googleapis.com/css?family=Karla:400" rel="stylesheet" type="text/css">
-        <link href="./style.css" rel="stylesheet" type="text/css">
+        <title>WMS API</title>
+        <link href="https://fonts.googleapis.com/css?family=Karla:400" rel="stylesheet" type="text/css" />
+        <link href="./style.css" rel="stylesheet" type="text/css" />
+        <script>
+            async function fetchServerInfo() {
+                const response = await fetch("/api-wms/app/info");
+                const data = await response.json();
+                document.getElementById("webServer").innerText = `Backend: ${data.webServer} Version ${data.backendVersion}`;
+                document.getElementById("nodeVersion").innerText = `Runtime: Node.js Version ${data.nodeVersion}`;
+
+                const developerName = data.developer;
+                const personalWebLink = data.website;
+                document.getElementById("developer").innerText = `Developed By: ${developerName}`;
+                document.getElementById("developer").href = personalWebLink;
+            }
+            window.onload = fetchServerInfo;
+        </script>
     </head>
     <body>
         <div class="container">
             <div class="content">
-                <div class="title" title="WMS">WMS</div>
-                <!-- <h3>Warehouse Management System</h3> -->
-                <div class="info"><br />
-                      Web Server : xxx version<br />
-                      Backend : xxx version <span><a title="" href="#">info</a></span><br />
-                      <!-- Document Root: <br /> -->
+                <div class="title" title="WMS-API">WMS-API</div>
+                <div class="info">
+                    <br />
+                    <span id="webServer">Backend: xxx version</span> <span><a title="" target="_blank" href="https://expressjs.com/">info</a></span
+                    ><br />
+                    <span id="nodeVersion">Runtime: xxx version</span> <span><a title="" target="_blank" href="https://nodejs.org/en">info</a></span
+                    ><br />
+                    <!-- Document Root: <br /> -->
                 </div>
                 <div class="opt">
-                  <div><a title="Getting Started" href="http://localhost:5000/api">Getting Started API Path</a></div>
+                    <div><a id="developer" title="developer" target="_blank" href="">Getting Started API Path</a></div>
                 </div>
             </div>
         </div>
