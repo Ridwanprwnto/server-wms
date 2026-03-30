@@ -137,7 +137,6 @@ const getLinePlanogramModel = async () => {
             A.shelf_plano,
             A.cell_plano,
             A.loc_plano,
-            A.prdcd_plano,
             B.line_master_plano
         FROM  pot_line_plano    AS A
         INNER JOIN pot_master_plano AS B ON A.head_id_master_plano = B.id_master_plano
@@ -236,15 +235,15 @@ const updateMasterPlanogramModel = async (id, { line_master_plano }) => {
 
         // ── Cek apakah ada lokasi yang masih memiliki prdcd (tidak NULL) ───────
         const prdcdCheck = await client.query(
-            `SELECT COUNT(*) AS total
-             FROM   pot_line_plano
-             WHERE  head_id_master_plano = $1
-               AND  prdcd_plano IS NOT NULL`,
+            `SELECT COUNT(*) AS total FROM pot_master_plano AS A 
+             INNER JOIN pot_line_plano AS B ON A.id_master_plano = B.head_id_master_plano 
+             INNER JOIN pot_storage_plano AS C ON B.id_plano = C.head_id_plano 
+             WHERE A.id_master_plano = $1`, 
             [id],
         );
         const totalPrdcd = parseInt(prdcdCheck.rows[0].total, 10);
         if (totalPrdcd > 0) {
-            throw new ProtectedError(`Master planogram "${lineName}" tidak dapat diupdate karena memiliki ${totalPrdcd} lokasi yang masih terdapat produk (prdcd).`);
+            throw new ProtectedError(`Master planogram "${lineName}" tidak dapat diupdate karena memiliki ${totalPrdcd} lokasi yang masih terpasang storage produk (prdcd).`);
         }
 
         // ── Update ─────────────────────────────────────────────────────────────
@@ -291,17 +290,17 @@ const deleteMasterPlanogramModel = async (id) => {
         }
         const lineName = masterCheck.rows[0].line_master_plano;
 
-        // ── Cek apakah ada lokasi yang masih memiliki prdcd (tidak NULL) ───────
+        // ── Cek apakah ada lokasi yang masih memiliki prdcd ───────
         const prdcdCheck = await client.query(
-            `SELECT COUNT(*) AS total
-             FROM   pot_line_plano
-             WHERE  head_id_master_plano = $1
-               AND  prdcd_plano IS NOT NULL`,
+            `SELECT COUNT(*) AS total FROM pot_master_plano AS A 
+             INNER JOIN pot_line_plano AS B ON A.id_master_plano = B.head_id_master_plano 
+             INNER JOIN pot_storage_plano AS C ON B.id_plano = C.head_id_plano 
+             WHERE A.id_master_plano = $1`, 
             [id],
         );
         const totalPrdcd = parseInt(prdcdCheck.rows[0].total, 10);
         if (totalPrdcd > 0) {
-            throw new ProtectedError(`Master planogram "${lineName}" tidak dapat dihapus karena memiliki ${totalPrdcd} lokasi yang masih terdapat produk (prdcd).`);
+            throw new ProtectedError(`Master planogram "${lineName}" tidak dapat dihapus karena memiliki ${totalPrdcd} lokasi yang masih terpasang storage produk (prdcd).`);
         }
 
         // ── Hapus semua line planogram terkait (prdcd sudah dipastikan NULL) ───
@@ -371,7 +370,7 @@ const updateLinePlanogramModel = async (id, { head_id_master_plano, rack_plano, 
         await client.query("BEGIN");
 
         // ── Cek baris ada ──────────────────────────────────────────────────────
-        const existCheck = await client.query(`SELECT id_plano FROM pot_line_plano WHERE id_plano = $1`, [id]);
+        const existCheck = await client.query(`SELECT A.rack_plano, A.shelf_plano, A.cell_plano, A.loc_plano, B.prdcd_str_plano FROM pot_line_plano AS A LEFT JOIN pot_storage_plano AS B ON A.id_plano = B.head_id_plano WHERE A.id_plano = $1`, [id]);
         if (existCheck.rowCount === 0) {
             await client.query("ROLLBACK");
             return null;
@@ -389,6 +388,16 @@ const updateLinePlanogramModel = async (id, { head_id_master_plano, rack_plano, 
             },
             id,
         );
+
+        const row = existCheck.rows[0];
+
+        // ── Validasi prdcd ─────────────────────────────────────────────────────
+        if (row.prdcd_str_plano !== null) {
+            // Buat label lokasi yang informatif untuk pesan error
+            const lokasiLabel = row.rack_plano ? `R${row.rack_plano}${row.shelf_plano ? "-S" + row.shelf_plano : ""}${row.cell_plano ? "-C" + row.cell_plano : ""}` : `LOC-${row.loc_plano}`;
+
+            throw new ProtectedError(`Lokasi ${lokasiLabel} tidak dapat dirubah karena masih terdapat storage yang terpasang atas produk (prdcd: ${row.prdcd_str_plano}).`);
+        }
 
         // ── Update ─────────────────────────────────────────────────────────────
         const result = await client.query(
@@ -425,12 +434,8 @@ const deleteLinePlanogramModel = async (id) => {
         await client.query("BEGIN");
 
         // ── Cek baris ada + ambil info prdcd sekaligus ─────────────────────────
-        const check = await client.query(
-            `SELECT id_plano, prdcd_plano, rack_plano, shelf_plano, cell_plano, loc_plano
-             FROM   pot_line_plano
-             WHERE  id_plano = $1`,
-            [id],
-        );
+        const check = await client.query(`SELECT A.rack_plano, A.shelf_plano, A.cell_plano, A.loc_plano, B.prdcd_str_plano FROM pot_line_plano AS A LEFT JOIN pot_storage_plano AS B ON A.id_plano = B.head_id_plano WHERE A.id_plano = $1`, [id]);
+       
         if (check.rowCount === 0) {
             await client.query("ROLLBACK");
             return null;
@@ -439,11 +444,11 @@ const deleteLinePlanogramModel = async (id) => {
         const row = check.rows[0];
 
         // ── Validasi prdcd ─────────────────────────────────────────────────────
-        if (row.prdcd_plano !== null) {
+        if (row.prdcd_str_plano !== null) {
             // Buat label lokasi yang informatif untuk pesan error
             const lokasiLabel = row.rack_plano ? `R${row.rack_plano}${row.shelf_plano ? "-S" + row.shelf_plano : ""}${row.cell_plano ? "-C" + row.cell_plano : ""}` : `LOC-${row.loc_plano}`;
 
-            throw new ProtectedError(`Lokasi ${lokasiLabel} tidak dapat dihapus karena masih terdapat produk (prdcd: ${row.prdcd_plano}).`);
+            throw new ProtectedError(`Lokasi ${lokasiLabel} tidak dapat dihapus karena masih terdapat storage yang terpasang atas produk (prdcd: ${row.prdcd_str_plano}).`);
         }
 
         // ── Hapus ──────────────────────────────────────────────────────────────
