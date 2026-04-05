@@ -1,5 +1,5 @@
 const express = require("express");
-const { getServerInfo } = require("../../controllers/serverInfoController");
+const { getServerInfo } = require("../../../controllers/web/serverInfoController");
 
 const infoRoute = express.Router();
 

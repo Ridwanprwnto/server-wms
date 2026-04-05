@@ -1,7 +1,7 @@
 // src/models/planogramATKModel.js
 
-const pool = require("../config/db");
-const { logInfo, logError } = require("../utils/logger");
+const { pool } = require("../../config/db");
+const { logInfo, logError } = require("../../utils/logger");
 
 // =============================================================================
 // CUSTOM ERROR — digunakan untuk membedakan error duplikat (409)
@@ -238,7 +238,7 @@ const updateMasterPlanogramModel = async (id, { line_master_plano }) => {
             `SELECT COUNT(*) AS total FROM pot_master_plano AS A 
              INNER JOIN pot_line_plano AS B ON A.id_master_plano = B.head_id_master_plano 
              INNER JOIN pot_storage_plano AS C ON B.id_plano = C.head_id_plano 
-             WHERE A.id_master_plano = $1`, 
+             WHERE A.id_master_plano = $1`,
             [id],
         );
         const totalPrdcd = parseInt(prdcdCheck.rows[0].total, 10);
@@ -295,7 +295,7 @@ const deleteMasterPlanogramModel = async (id) => {
             `SELECT COUNT(*) AS total FROM pot_master_plano AS A 
              INNER JOIN pot_line_plano AS B ON A.id_master_plano = B.head_id_master_plano 
              INNER JOIN pot_storage_plano AS C ON B.id_plano = C.head_id_plano 
-             WHERE A.id_master_plano = $1`, 
+             WHERE A.id_master_plano = $1`,
             [id],
         );
         const totalPrdcd = parseInt(prdcdCheck.rows[0].total, 10);
@@ -370,7 +370,10 @@ const updateLinePlanogramModel = async (id, { head_id_master_plano, rack_plano, 
         await client.query("BEGIN");
 
         // ── Cek baris ada ──────────────────────────────────────────────────────
-        const existCheck = await client.query(`SELECT A.rack_plano, A.shelf_plano, A.cell_plano, A.loc_plano, B.prdcd_str_plano FROM pot_line_plano AS A LEFT JOIN pot_storage_plano AS B ON A.id_plano = B.head_id_plano WHERE A.id_plano = $1`, [id]);
+        const existCheck = await client.query(
+            `SELECT A.rack_plano, A.shelf_plano, A.cell_plano, A.loc_plano, B.prdcd_str_plano FROM pot_line_plano AS A LEFT JOIN pot_storage_plano AS B ON A.id_plano = B.head_id_plano WHERE A.id_plano = $1`,
+            [id],
+        );
         if (existCheck.rowCount === 0) {
             await client.query("ROLLBACK");
             return null;
@@ -434,8 +437,11 @@ const deleteLinePlanogramModel = async (id) => {
         await client.query("BEGIN");
 
         // ── Cek baris ada + ambil info prdcd sekaligus ─────────────────────────
-        const check = await client.query(`SELECT A.rack_plano, A.shelf_plano, A.cell_plano, A.loc_plano, B.prdcd_str_plano FROM pot_line_plano AS A LEFT JOIN pot_storage_plano AS B ON A.id_plano = B.head_id_plano WHERE A.id_plano = $1`, [id]);
-       
+        const check = await client.query(
+            `SELECT A.rack_plano, A.shelf_plano, A.cell_plano, A.loc_plano, B.prdcd_str_plano FROM pot_line_plano AS A LEFT JOIN pot_storage_plano AS B ON A.id_plano = B.head_id_plano WHERE A.id_plano = $1`,
+            [id],
+        );
+
         if (check.rowCount === 0) {
             await client.query("ROLLBACK");
             return null;

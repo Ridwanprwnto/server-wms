@@ -1,7 +1,7 @@
 // src/models/masterATKModel.js
 
-const pool = require("../config/db");
-const { logInfo, logError } = require("../utils/logger");
+const { pool } = require("../../config/db");
+const { logInfo, logError } = require("../../utils/logger");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPER KONVERSI — private, tidak di-export

@@ -1,5 +1,5 @@
 const express = require("express");
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware = require("../../middleware/authMiddleware");
 const app = require("./app.route");
 // const auth = require("./auth.route.js");
 const main = require("./main.route");

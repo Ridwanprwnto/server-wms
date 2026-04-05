@@ -1,5 +1,5 @@
 // handlers/serverInfo.js
-const { logInfo } = require("../utils/logger");
+const { logInfo } = require("../../utils/logger");
 const path = require("path");
 const dotenv = require("dotenv");
 const fs = require("fs");
@@ -7,7 +7,7 @@ const fs = require("fs");
 dotenv.config();
 
 const getServerInfo = async (req, res) => {
-    const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../../package.json"), "utf8"));
+    const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../../../package.json"), "utf8"));
 
     const serverInfo = {
         webServer: process.env.WEB_SERVER || "Express",

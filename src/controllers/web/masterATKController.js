@@ -1,9 +1,9 @@
 // src/controllers/masterATKController.js
-const { getSyncModel, upsertSyncModel, getProdukModel, upsertProdukFromCsv, getSupplierModel, upsertSupplierFromCsv, getStockModel, upsertStockFromCsv } = require("../models/masterATKModel");
+const { getSyncModel, upsertSyncModel, getProdukModel, upsertProdukFromCsv, getSupplierModel, upsertSupplierFromCsv, getStockModel, upsertStockFromCsv } = require("../../models/web/masterATKModel");
 
-const { parseCsvBuffer } = require("../utils/csvParser");
-const { validateRequiredColumns, isNotEmpty, countRowStats } = require("../utils/csvValidator");
-const { logInfo, logError } = require("../utils/logger");
+const { parseCsvBuffer } = require("../../utils/csvParser");
+const { validateRequiredColumns, isNotEmpty, countRowStats } = require("../../utils/csvValidator");
+const { logInfo, logError } = require("../../utils/logger");
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET: Master Produk

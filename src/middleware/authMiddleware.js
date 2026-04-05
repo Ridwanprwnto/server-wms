@@ -2,14 +2,15 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const authMiddleware = (req, res, next) => {
-    // Jika request datang dari Kong Gateway (ada header X-Consumer)
-    const Consumer = req.headers["x-consumer-username"];
-    if (Consumer) {
-        req.user = { username: Consumer };
+    // Jika request datang dari Kong Gateway
+    const consumer = req.headers["x-consumer-username"];
+    
+    if (consumer) {
+        req.user = { username: consumer };
         return next();
     }
 
-    // Jika request langsung dari frontend (tanpa lewat Kong Gateway)
+    // Jika request langsung dari frontend (via API Key)
     const authHeader = req.headers["authorization"] || req.headers["x-api-key"] || req.headers["apikey"];
 
     if (!authHeader) {
@@ -19,7 +20,6 @@ const authMiddleware = (req, res, next) => {
         });
     }
 
-    // Support format: "ApiKey <key>" atau langsung "<key>"
     const apiKey = authHeader.startsWith("ApiKey ") ? authHeader.split(" ")[1] : authHeader;
 
     if (apiKey !== process.env.API_KEY) {
@@ -29,8 +29,11 @@ const authMiddleware = (req, res, next) => {
         });
     }
 
-    // Jika valid, set user pseudo (karena tidak ada JWT decoding)
-    req.user = { username: "frontend-client" };
+    // Jika valid, set user pseudo
+    // Ambil username/role dari header custom jika dikirim manual oleh frontend
+    req.user = { 
+        username: req.headers["x-user-username"] || "frontend-client"
+    };
     next();
 };
 
