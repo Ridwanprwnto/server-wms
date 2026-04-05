@@ -1,6 +1,13 @@
 const express = require("express");
-const { uploadProdukController, uploadSupplierController, uploadStockController, getProdukController, getSupplierController, getStockController } = require("../../controllers/masterATKController");
-const { upload } = require("../../utils/upload");
+const {
+    uploadProdukController,
+    uploadSupplierController,
+    uploadStockController,
+    getProdukController,
+    getSupplierController,
+    getStockController,
+} = require("../../../controllers/web/masterATKController");
+const { upload } = require("../../../utils/upload");
 
 const masterATKRoute = express.Router();
 

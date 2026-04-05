@@ -2,8 +2,9 @@
 const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
-const appRoute = require("./routers/index");
-const { logger, logInfo } = require("./utils/logger");
+const webRoute = require("./routers/web/index");
+const mobileRoute = require("./routers/mobile/index");
+const { logger } = require("./utils/logger");
 const setupCors = require("./middleware/corsConfig");
 
 dotenv.config();
@@ -32,8 +33,9 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-app.use(process.env.PATH_API, appRoute);
+app.use(process.env.PATH_API, webRoute);
+app.use(process.env.PATH_API_MOBILE, mobileRoute);
 
 app.listen(PORT, () => {
-    logInfo(`Server is running on port ${PORT}`);
+    logger.info(`Server is running on port ${PORT}`);
 });

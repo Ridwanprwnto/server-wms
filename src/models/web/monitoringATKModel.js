@@ -1,14 +1,14 @@
 // src/models/monitoringATKModel.js
-const pool = require("../config/db");
-const { logInfo, logError } = require("../utils/logger");
+const { pool } = require("../../config/db");
+const { logInfo, logError } = require("../../utils/logger");
 
 // =============================================================================
 // HELPER: buildWhereClause
 // =============================================================================
 function buildWhereClause({ search = "" }) {
     const conditions = [];
-    const params     = [];
-    let   idx        = 1;
+    const params = [];
+    let idx = 1;
 
     if (search) {
         conditions.push(`(
@@ -20,9 +20,7 @@ function buildWhereClause({ search = "" }) {
         idx++;
     }
 
-    const where = conditions.length > 0
-        ? `WHERE ${conditions.join(" AND ")}`
-        : "";
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     return { where, params, nextIndex: idx };
 }
@@ -38,19 +36,19 @@ function buildWhereClause({ search = "" }) {
 // satuan/pecahan produk, bukan batas minimum stok.
 // =============================================================================
 function mapRow(row) {
-    const quantity = Number(row.qty         ?? 0);
-    const frac     = Number(row.frac        ?? 0);
-    const plano    = row.total_plano != null ? Number(row.total_plano) : null;
+    const quantity = Number(row.qty ?? 0);
+    const frac = Number(row.frac ?? 0);
+    const plano = row.total_plano != null ? Number(row.total_plano) : null;
     const variance = plano != null ? plano - quantity : null;
 
     const status = quantity > 0 ? "in_stock" : "out_of_stock";
 
     return {
-        id:          row.prdcd,
-        sku:         row.prdcd,
-        name:        row.nama,
-        shortName:   row.singkat,
-        kemasan:     row.kemasan,
+        id: row.prdcd,
+        sku: row.prdcd,
+        name: row.nama,
+        shortName: row.singkat,
+        kemasan: row.kemasan,
         frac,
         quantity,
         plano,
@@ -100,13 +98,10 @@ const getMonitoringStockModel = async ({ search = "", limit = 10, offset = 0 }) 
     `;
 
     try {
-        const [dataResult, countResult] = await Promise.all([
-            pool.query(dataQuery,  dataParams),
-            pool.query(countQuery, params),
-        ]);
+        const [dataResult, countResult] = await Promise.all([pool.query(dataQuery, dataParams), pool.query(countQuery, params)]);
 
         const total = parseInt(countResult.rows[0]?.total ?? 0, 10);
-        const rows  = dataResult.rows.map(mapRow);
+        const rows = dataResult.rows.map(mapRow);
 
         logInfo(`getMonitoringStockModel OK — total=${total}, returned=${rows.length}, offset=${offset}, limit=${limit}`);
         return { rows, total };
@@ -141,12 +136,12 @@ const getMonitoringSummaryModel = async ({ search = "" }) => {
 
     try {
         const result = await pool.query(query, params);
-        const row    = result.rows[0] ?? {};
+        const row = result.rows[0] ?? {};
 
         const summary = {
-            totalItems:    parseInt(row.total_items    ?? 0, 10),
-            totalStock:    parseInt(row.total_stock    ?? 0, 10),
-            totalPlano:    parseInt(row.total_plano    ?? 0, 10),
+            totalItems: parseInt(row.total_items ?? 0, 10),
+            totalStock: parseInt(row.total_stock ?? 0, 10),
+            totalPlano: parseInt(row.total_plano ?? 0, 10),
             totalVariance: parseInt(row.total_variance ?? 0, 10),
         };
 

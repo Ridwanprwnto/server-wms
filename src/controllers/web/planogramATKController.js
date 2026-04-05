@@ -13,8 +13,8 @@ const {
     updateLinePlanogramModel,
     deleteLinePlanogramModel,
     bulkCreateLinePlanogramModel,
-} = require("../models/planogramATKModel");
-const { logInfo, logError } = require("../utils/logger");
+} = require("../../models/web/planogramATKModel");
+const { logInfo, logError } = require("../../utils/logger");
 
 // =============================================================================
 // HELPER — response seragam untuk tiap jenis error
@@ -304,7 +304,7 @@ const bulkCreateLinePlanogramController = async (req, res) => {
 
         // Resolve line_master_plano → head_id_master_plano
         // Ambil semua master sekaligus untuk menghindari N query
-        const { rows: masters } = await require("../config/db").query(`SELECT id_master_plano, UPPER(line_master_plano) AS line_upper FROM pot_master_plano`);
+        const { rows: masters } = await require("../../config/db").query(`SELECT id_master_plano, UPPER(line_master_plano) AS line_upper FROM pot_master_plano`);
         const masterMap = new Map(masters.map((m) => [m.line_upper, m.id_master_plano]));
 
         const resolveErrors = [];

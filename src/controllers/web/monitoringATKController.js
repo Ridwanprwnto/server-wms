@@ -1,9 +1,6 @@
 // src/controllers/monitoringATKController.js
-const {
-    getMonitoringStockModel,
-    getMonitoringSummaryModel,
-} = require("../models/monitoringATKModel");
-const { logInfo, logError } = require("../utils/logger");
+const { getMonitoringStockModel, getMonitoringSummaryModel } = require("../../models/web/monitoringATKModel");
+const { logInfo, logError } = require("../../utils/logger");
 
 // =============================================================================
 // HELPER: handleError
@@ -14,7 +11,7 @@ function handleError(res, err, context) {
     return res.status(500).json({
         success: false,
         message: `Terjadi kesalahan pada ${context}.`,
-        error:   message,
+        error: message,
     });
 }
 
@@ -48,8 +45,8 @@ const getMonitoringATKController = async (req, res) => {
     const context = "getMonitoringATKController";
     try {
         const search = (req.query.search ?? "").toString().trim();
-        const page   = parseIntParam(req.query.page,  1);
-        const limit  = parseIntParam(req.query.limit, 10);
+        const page = parseIntParam(req.query.page, 1);
+        const limit = parseIntParam(req.query.limit, 10);
         const offset = (page - 1) * limit;
 
         // Jalankan query data halaman dan summary secara paralel
@@ -63,7 +60,7 @@ const getMonitoringATKController = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            data:    rows,
+            data: rows,
             pagination: {
                 total,
                 page,

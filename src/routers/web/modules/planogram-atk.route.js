@@ -1,7 +1,5 @@
-// src/routes/main/atk/planogramATKRoute.js
-
 const express = require("express");
-const { upload } = require("../../utils/upload");
+const { upload } = require("../../../utils/upload");
 const {
     getTypePlanogramController,
     getMasterPlanogramController,
@@ -13,7 +11,7 @@ const {
     updateLinePlanogramController,
     deleteLinePlanogramController,
     bulkCreateLinePlanogramController,
-} = require("../../controllers/planogramATKController");
+} = require("../../../controllers/web/planogramATKController");
 
 const planogramATKRoute = express.Router();
 
