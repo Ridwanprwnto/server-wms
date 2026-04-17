@@ -154,9 +154,46 @@ const getMonitoringSummaryModel = async ({ search = "" }) => {
 };
 
 // =============================================================================
+// GET ALL MONITORING STOCK — tanpa paginasi (untuk export)
+// =============================================================================
+const getAllMonitoringStockModel = async ({ search = "" }) => {
+    const { where, params } = buildWhereClause({ search });
+
+    const query = `
+        SELECT
+            A.prdcd,
+            A.nama,
+            A.singkat,
+            A.kemasan,
+            A.frac,
+            B.qty,
+            SUM(C.qty_str_plano)  AS total_plano,
+            MAX(C.date_str_plano) AS date_str_plano
+        FROM       pot_prodmast       AS A
+        INNER JOIN pot_stmast         AS B ON A.prdcd = B.prdcd
+        LEFT JOIN  pot_storage_plano  AS C ON A.prdcd = C.prdcd_str_plano
+        ${where}
+        GROUP BY A.prdcd, A.nama, A.singkat, A.kemasan, A.frac, B.qty
+        ORDER BY A.prdcd ASC
+    `;
+
+    try {
+        const result = await pool.query(query, params);
+        const rows = result.rows.map(mapRow);
+
+        logInfo(`getAllMonitoringStockModel OK — returned=${rows.length}, search="${search}"`);
+        return rows;
+    } catch (err) {
+        logError(`getAllMonitoringStockModel ERROR: ${err.message}`);
+        throw err;
+    }
+};
+
+// =============================================================================
 // EXPORTS
 // =============================================================================
 module.exports = {
     getMonitoringStockModel,
     getMonitoringSummaryModel,
+    getAllMonitoringStockModel,
 };

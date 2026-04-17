@@ -1,5 +1,5 @@
 // src/controllers/monitoringATKController.js
-const { getMonitoringStockModel, getMonitoringSummaryModel } = require("../../models/web/monitoringATKModel");
+const { getMonitoringStockModel, getMonitoringSummaryModel, getAllMonitoringStockModel } = require("../../models/web/monitoringATKModel");
 const { logInfo, logError } = require("../../utils/logger");
 
 // =============================================================================
@@ -75,8 +75,42 @@ const getMonitoringATKController = async (req, res) => {
 };
 
 // =============================================================================
+// GET: Export All Stock — tanpa paginasi (untuk unduh Excel)
+// GET /api/main/atk/stocks/export
+//
+// Query params:
+//   search  {string}  — pencarian pada prdcd, nama, singkat (opsional)
+//
+// Response:
+//   {
+//     success: true,
+//     data:    StockItem[],
+//     total:   number
+//   }
+// =============================================================================
+const exportMonitoringATKController = async (req, res) => {
+    const context = "exportMonitoringATKController";
+    try {
+        const search = (req.query.search ?? "").toString().trim();
+
+        const rows = await getAllMonitoringStockModel({ search });
+
+        logInfo(`${context} OK — total=${rows.length}, search="${search}"`);
+
+        return res.status(200).json({
+            success: true,
+            data:    rows,
+            total:   rows.length,
+        });
+    } catch (err) {
+        return handleError(res, err, context);
+    }
+};
+
+// =============================================================================
 // EXPORTS
 // =============================================================================
 module.exports = {
     getMonitoringATKController,
+    exportMonitoringATKController,
 };
