@@ -19,7 +19,7 @@ const ProductATKModel = {
 
         if (search) {
             conditions.push(
-                `(prdcd ILIKE $${idx} OR nama ILIKE $${idx} OR singkat ILIKE $${idx})`
+                `(prdcd ILIKE $${idx} OR nama ILIKE $${idx} OR singkat ILIKE $${idx} OR desc2 ILIKE $${idx})`
             );
             params.push(`%${search}%`);
             idx++;
@@ -34,7 +34,7 @@ const ProductATKModel = {
         const countSql = `SELECT COUNT(*) FROM pot_prodmast ${where}`;
         const dataSql = `
             SELECT
-                prdcd, nama, singkat, merk, kemasan, prd_size,
+                prdcd, nama, singkat, desc2, merk, kemasan, prd_size,
                 frac, unit, cat_cod, div, ctgr, supco,
                 acost, rcost, lcost, upd_date
             FROM pot_prodmast
@@ -65,7 +65,7 @@ const ProductATKModel = {
     async findByPrdcd(prdcd) {
         const sql = `
             SELECT
-                p.prdcd, p.nama, p.singkat, p.merk,
+                p.prdcd, p.nama, p.singkat, p.desc2, p.merk,
                 p.kemasan, p.prd_size, p.frac, p.unit,
                 p.cat_cod, p.div, p.ctgr, p.supco,
                 p.acost, p.rcost, p.lcost, p.upd_date,

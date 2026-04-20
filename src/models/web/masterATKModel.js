@@ -300,7 +300,7 @@ const upsertSyncModel = async (office, master) => {
 const getProdukModel = async (office) => {
     const query = `
         SELECT
-            cat_cod, prdcd, prd_desc, singkat, merk, nama,
+            cat_cod, prdcd, prd_desc, singkat, desc2, merk, nama,
             kemasan, prd_size, frac, unit,
             acost, rcost, lcost,
             div, ctgr, supco, ptag, upd_date

@@ -93,7 +93,7 @@ const OpnameController = {
             logInfo(`[Opname] Item upserted: plano=${id_plano} prdcd=${prdcd} qty=${quantity} by ${req.user.username}`);
             return response.success(
                 res,
-                { ...item, nama: product.nama, singkat: product.singkat, unit: product.unit, frac: product.frac },
+                { ...item, nama: product.nama, singkat: product.singkat, desc: product.desc2, unit: product.unit, frac: product.frac },
                 "Item opname disimpan",
                 201
             );

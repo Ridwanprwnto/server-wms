@@ -212,6 +212,7 @@ const PlanogramController = {
                     ...storage,
                     nama: product.nama,
                     singkat: product.singkat,
+                    desc: product.desc2,
                     unit: product.unit,
                 },
                 "Storage berhasil disimpan",
