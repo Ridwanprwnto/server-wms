@@ -70,10 +70,7 @@ const PlanogramATKModel = {
 
         params.push(limit, offset);
 
-        const [countRes, dataRes] = await Promise.all([
-            pool.query(countSql, params.slice(0, -2)),
-            pool.query(dataSql, params),
-        ]);
+        const [countRes, dataRes] = await Promise.all([pool.query(countSql, params.slice(0, -2)), pool.query(dataSql, params)]);
 
         return {
             data: dataRes.rows,
@@ -116,10 +113,7 @@ const PlanogramATKModel = {
                 l.loc_plano ASC NULLS LAST
         `;
 
-        const [masterRes, linesRes] = await Promise.all([
-            pool.query(masterSql, [id]),
-            pool.query(linesSql, [id]),
-        ]);
+        const [masterRes, linesRes] = await Promise.all([pool.query(masterSql, [id]), pool.query(linesSql, [id])]);
 
         if (!masterRes.rows[0]) return null;
 
@@ -163,6 +157,7 @@ const PlanogramATKModel = {
                 s.qty_str_plano   AS qty,
                 s.date_str_plano  AS updated_at,
                 p.nama,
+                p.desc2,
                 p.singkat,
                 p.kemasan,
                 p.unit,
@@ -173,10 +168,7 @@ const PlanogramATKModel = {
             ORDER BY s.prdcd_str_plano ASC
         `;
 
-        const [lineRes, storageRes] = await Promise.all([
-            pool.query(lineSql, [id]),
-            pool.query(storageSql, [id]),
-        ]);
+        const [lineRes, storageRes] = await Promise.all([pool.query(lineSql, [id]), pool.query(storageSql, [id])]);
 
         if (!lineRes.rows[0]) return null;
 
