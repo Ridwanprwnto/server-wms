@@ -90,6 +90,7 @@ const OpnameATKModel = {
                 oi.updated_at,
                 p.nama,
                 p.singkat,
+                p.desc2,
                 p.unit,
                 p.kemasan,
                 p.frac
@@ -124,6 +125,7 @@ const OpnameATKModel = {
                 t.name_type_plano,
                 p.nama,
                 p.singkat,
+                p.desc2,
                 p.unit,
                 p.frac,
                 p.kemasan,
