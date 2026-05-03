@@ -11,12 +11,18 @@ const {
     updateLinePlanogramController,
     deleteLinePlanogramController,
     bulkCreateLinePlanogramController,
+    exportPlanogramController,
 } = require("../../../controllers/web/planogramATKController");
 
 const planogramATKRoute = express.Router();
 
 // ─── TYPE ─────────────────────────────────────────────────────────────────────
 planogramATKRoute.get("/types", getTypePlanogramController);
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+// PENTING: /export harus didaftarkan SEBELUM /lines agar tidak bentrok dengan :id
+planogramATKRoute.get("/export", exportPlanogramController);
+
 
 // ─── MASTER ───────────────────────────────────────────────────────────────────
 planogramATKRoute.get("/masters", getMasterPlanogramController);

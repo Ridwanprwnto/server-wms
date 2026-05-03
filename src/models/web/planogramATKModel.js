@@ -567,6 +567,45 @@ const bulkCreateLinePlanogramModel = async (rows) => {
 };
 
 // =============================================================================
+// EXPORT PLANOGRAM — untuk ekspor ke Excel
+// Menggabungkan type, master, dan line planogram beserta data storage produk
+// =============================================================================
+const exportPlanogramModel = async () => {
+    const query = `
+        SELECT
+            T.name_type_plano,
+            M.line_master_plano,
+            L.rack_plano,
+            L.shelf_plano,
+            L.cell_plano,
+            L.loc_plano,
+            S.prdcd_str_plano,
+            S.qty_str_plano,
+            S.date_str_plano,
+            P.desc2,
+            P.frac
+        FROM   pot_line_plano       AS L
+        INNER JOIN pot_master_plano AS M ON L.head_id_master_plano = M.id_master_plano
+        INNER JOIN pot_type_plano   AS T ON M.head_id_type_plano   = T.id_type_plano
+        LEFT  JOIN pot_storage_plano AS S ON L.id_plano = S.head_id_plano
+        LEFT  JOIN pot_prodmast AS P ON S.prdcd_str_plano = P.prdcd
+        ORDER BY M.line_master_plano ASC,
+                 L.rack_plano        ASC NULLS LAST,
+                 L.shelf_plano       ASC NULLS LAST,
+                 L.cell_plano        ASC NULLS LAST,
+                 L.loc_plano         ASC NULLS LAST
+    `;
+    try {
+        const result = await pool.query(query);
+        logInfo(`exportPlanogramModel OK — rows: ${result.rows.length}`);
+        return result.rows;
+    } catch (err) {
+        logError(`exportPlanogramModel ERROR: ${err.message}`);
+        throw err;
+    }
+};
+
+// =============================================================================
 // EXPORTS
 // =============================================================================
 module.exports = {
@@ -582,4 +621,5 @@ module.exports = {
     updateLinePlanogramModel,
     deleteLinePlanogramModel,
     bulkCreateLinePlanogramModel,
+    exportPlanogramModel,
 };

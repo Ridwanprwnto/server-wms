@@ -13,6 +13,7 @@ const {
     updateLinePlanogramModel,
     deleteLinePlanogramModel,
     bulkCreateLinePlanogramModel,
+    exportPlanogramModel,
 } = require("../../models/web/planogramATKModel");
 const { logInfo, logError } = require("../../utils/logger");
 
@@ -369,6 +370,20 @@ const bulkCreateLinePlanogramController = async (req, res) => {
     }
 };
 
+// =============================================================================
+// GET: Export Planogram (untuk ekspor Excel di frontend)
+// GET /api/main/atk/planogram/export
+// =============================================================================
+const exportPlanogramController = async (req, res) => {
+    try {
+        const rows = await exportPlanogramModel();
+        logInfo(`exportPlanogramController OK, rows=${rows.length}`);
+        return res.status(200).json({ success: true, data: rows });
+    } catch (err) {
+        return handleError(res, err, "exportPlanogramController");
+    }
+};
+
 module.exports = {
     getTypePlanogramController,
     getMasterPlanogramController,
@@ -380,4 +395,5 @@ module.exports = {
     updateLinePlanogramController,
     deleteLinePlanogramController,
     bulkCreateLinePlanogramController,
+    exportPlanogramController,
 };
