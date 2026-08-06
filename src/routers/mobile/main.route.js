@@ -1,8 +1,11 @@
 const express = require("express");
-const moduleDashboardATK  = require("./modules/dashboard-atk.route.js");
-const moduleProductATK    = require("./modules/product-atk.route.js");
-const moduleOpnameATK     = require("./modules/opname-atk.route.js");
-const modulePlanogramATK  = require("./modules/planogram-atk.route.js");
+
+const moduleDashboardATK = require("./modules/dashboard-atk.route.js");
+const moduleProductATK = require("./modules/product-atk.route.js");
+const moduleOpnameATK = require("./modules/opname-atk.route.js");
+const modulePlanogramATK = require("./modules/planogram-atk.route.js");
+
+const moduleSortingPool = require("./modules/sortingpool.route.js");
 
 const mainRouter = express.Router();
 
@@ -17,5 +20,8 @@ mainRouter.use("/atk/opname", moduleOpnameATK);
 
 // /api-wmsmobile/main/atk/planogram
 mainRouter.use("/atk/planogram", modulePlanogramATK);
+
+// /api-mssmobile/main/sortingpool
+mainRouter.use("/sortingpool", moduleSortingPool);
 
 module.exports = mainRouter;
