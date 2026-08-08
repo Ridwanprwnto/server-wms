@@ -30,27 +30,32 @@ const SortingPoolModel = {
                 headerData.TOK_NAME
             ]);
 
-            // Insert Details
+            // Insert Details (Optimized Bulk Insert)
             if (detailsData && detailsData.length > 0) {
-                const detailSql = `
-                    INSERT INTO sorting_pool_detail (nopick, zona, dusno, fpakai)
-                    VALUES ($1, $2, $3, $4)
-                `;
+                // Ambil daftar dusno yang sudah ada untuk nopick ini
+                const existingRes = await client.query(
+                    `SELECT dusno FROM sorting_pool_detail WHERE nopick = $1`,
+                    [headerData.NoToko]
+                );
+                const existingDusno = new Set(existingRes.rows.map(r => r.dusno));
+
+                const values = [];
+                const params = [];
+                let paramIndex = 1;
+
                 for (const detail of detailsData) {
-                    // Cek apakah dusno sudah ada untuk menghindari duplikat jika dipanggil berkali-kali
-                    const checkDetail = await client.query(
-                        `SELECT 1 FROM sorting_pool_detail WHERE nopick = $1 AND dusno = $2 LIMIT 1`,
-                        [headerData.NoToko, detail.DusNo]
-                    );
-                    
-                    if (checkDetail.rowCount === 0) {
-                        await client.query(detailSql, [
-                            headerData.NoToko,
-                            detail.Zona,
-                            detail.DusNo,
-                            detail.FPakai
-                        ]);
+                    if (!existingDusno.has(detail.DusNo)) {
+                        values.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
+                        params.push(headerData.NoToko, detail.Zona, detail.DusNo, detail.FPakai);
                     }
+                }
+
+                if (values.length > 0) {
+                    const detailSql = `
+                        INSERT INTO sorting_pool_detail (nopick, zona, dusno, fpakai)
+                        VALUES ${values.join(', ')}
+                    `;
+                    await client.query(detailSql, params);
                 }
             }
 
