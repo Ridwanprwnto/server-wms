@@ -27,6 +27,24 @@ const MonitoringSortasiModel = {
         `;
         const result = await pool.query(sql, [date]);
         return result.rows;
+    },
+
+    async getDetailsByNopick(nopick) {
+        if (!nopick) return [];
+
+        const sql = `
+            SELECT 
+                dusno,
+                zona,
+                is_scanned,
+                scanned_at,
+                scanned_by
+            FROM sorting_pool_detail
+            WHERE nopick = $1
+            ORDER BY dusno ASC;
+        `;
+        const result = await pool.query(sql, [nopick]);
+        return result.rows;
     }
 };
 

@@ -47,6 +47,31 @@ const MonitoringSortasiController = {
                 message: 'Internal server error while fetching sorting progress'
             });
         }
+    },
+
+    async getDetails(req, res) {
+        try {
+            const nopick = req.params.nopick;
+            if (!nopick) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'nopick parameter is required'
+                });
+            }
+
+            const data = await RealMonitoringSortasiModel.getDetailsByNopick(nopick);
+            
+            return res.status(200).json({
+                status: 'success',
+                data: data
+            });
+        } catch (error) {
+            console.error('[MonitoringSortasiController.getDetails]', error);
+            return res.status(500).json({
+                status: 'error',
+                message: 'Internal server error while fetching sorting details'
+            });
+        }
     }
 };
 

@@ -6,5 +6,6 @@ const MonitoringSortasiController = require('../../../controllers/web/monitoring
 // const { verifyToken } = require('../../../middleware/auth');
 
 router.get('/', MonitoringSortasiController.getProgress);
+router.get('/:nopick/details', MonitoringSortasiController.getDetails);
 
 module.exports = router;
