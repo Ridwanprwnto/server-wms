@@ -16,4 +16,7 @@ sortingPoolRoute.put("/complete", SortingPoolController.completeProcess);
 // GET /progress/:nopick -> Ambil progress/status terkini
 sortingPoolRoute.get("/progress/:nopick", SortingPoolController.getProgress);
 
+// PUT /sync-containers -> Sync data container terbaru dari DPD
+sortingPoolRoute.put("/sync-containers", SortingPoolController.syncContainers);
+
 module.exports = sortingPoolRoute;
