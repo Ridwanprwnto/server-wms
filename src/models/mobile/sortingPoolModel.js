@@ -17,17 +17,20 @@ const SortingPoolModel = {
 
             // Insert Header
             const headerSql = `
-                INSERT INTO sorting_pool_header (nopick, no_urutsp, tglpic, toko, gate, tokoname, status)
-                VALUES ($1, $2, $3, $4, $5, $6, 'in_progress')
+                INSERT INTO sorting_pool_header (nopick, no_urutsp, tglpic, toko, gate, tokoname, status, fscanfraction)
+                VALUES ($1, $2, $3, $4, $5, $6, 'in_progress', $7)
                 ON CONFLICT (nopick) DO NOTHING
             `;
+            const fscanValue = (headerData.fscanfraction === true || headerData.fscanfraction === 'true' || headerData.fscanfraction == 1) ? 1 : 0;
+            
             await client.query(headerSql, [
                 headerData.NoToko, 
                 headerData.NO_URUTSP, 
                 headerData.TglPic, 
                 headerData.Toko, 
                 headerData.Gate, 
-                headerData.TOK_NAME
+                headerData.TOK_NAME,
+                fscanValue
             ]);
 
             // Insert Details (Optimized Bulk Insert)
@@ -105,6 +108,58 @@ const SortingPoolModel = {
         `;
         const result = await pool.query(sql, [nopick, user]);
         return result.rows[0];
+    },
+
+    async syncContainers(nopick, headerData, detailsData) {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Update fscanfraction jika headerData tersedia
+            if (headerData && headerData.fscanfraction !== undefined) {
+                const fscanValue = (headerData.fscanfraction === true || headerData.fscanfraction === 'true' || headerData.fscanfraction == 1) ? 1 : 0;
+                await client.query(
+                    `UPDATE sorting_pool_header SET fscanfraction = $1 WHERE nopick = $2`,
+                    [fscanValue, nopick]
+                );
+            }
+
+            if (detailsData && detailsData.length > 0) {
+                // Ambil daftar dusno yang sudah ada untuk nopick ini
+                const existingRes = await client.query(
+                    `SELECT dusno FROM sorting_pool_detail WHERE nopick = $1`,
+                    [nopick]
+                );
+                const existingDusno = new Set(existingRes.rows.map(r => r.dusno));
+
+                const values = [];
+                const params = [];
+                let paramIndex = 1;
+
+                for (const detail of detailsData) {
+                    if (!existingDusno.has(detail.DusNo)) {
+                        values.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
+                        params.push(nopick, detail.Zona, detail.DusNo, detail.FPakai);
+                    }
+                }
+
+                if (values.length > 0) {
+                    const detailSql = `
+                        INSERT INTO sorting_pool_detail (nopick, zona, dusno, fpakai)
+                        VALUES ${values.join(', ')}
+                    `;
+                    await client.query(detailSql, params);
+                }
+            }
+
+            await client.query('COMMIT');
+            return true;
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 };
 

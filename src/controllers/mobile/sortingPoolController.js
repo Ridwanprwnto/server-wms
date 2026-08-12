@@ -111,6 +111,39 @@ const SortingPoolController = {
             console.error("Error in getProgress:", error);
             return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
         }
+    },
+
+    // Sync containers dari backend 1 ke backend 2
+    async syncContainers(req, res) {
+        try {
+            const { nopick, headerData, detailsData } = req.body;
+
+            if (!nopick) {
+                return res.status(400).json({ success: false, message: "nopick is required" });
+            }
+            if (!detailsData || !Array.isArray(detailsData)) {
+                return res.status(400).json({ success: false, message: "detailsData is required and must be an array" });
+            }
+
+            const success = await SortingPoolModel.syncContainers(nopick, headerData, detailsData);
+            
+            if (!success) {
+                return res.status(400).json({ success: false, message: "Failed to sync containers" });
+            }
+
+            // Return current progress to update UI
+            const progress = await SortingPoolModel.getProgress(nopick);
+
+            return res.status(200).json({
+                success: true,
+                message: "Containers synced successfully",
+                data: progress
+            });
+
+        } catch (error) {
+            console.error("Error in syncContainers:", error);
+            return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+        }
     }
 };
 
