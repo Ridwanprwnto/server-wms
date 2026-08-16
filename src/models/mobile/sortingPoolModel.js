@@ -17,11 +17,12 @@ const SortingPoolModel = {
 
             // Insert Header
             const headerSql = `
-                INSERT INTO sorting_pool_header (nopick, no_urutsp, tglpic, toko, gate, tokoname, status, fscanfraction)
-                VALUES ($1, $2, $3, $4, $5, $6, 'in_progress', $7)
+                INSERT INTO sorting_pool_header (nopick, no_urutsp, tglpic, toko, gate, tokoname, status, fscanfraction, floading)
+                VALUES ($1, $2, $3, $4, $5, $6, 'in_progress', $7, $8)
                 ON CONFLICT (nopick) DO NOTHING
             `;
             const fscanValue = (headerData.fscanfraction === true || headerData.fscanfraction === 'true' || headerData.fscanfraction == 1) ? 1 : 0;
+            const floadingValue = (headerData.floading === true || headerData.floading === 'true' || headerData.floading == 1) ? 1 : 0;
             
             await client.query(headerSql, [
                 headerData.NoToko, 
@@ -30,7 +31,8 @@ const SortingPoolModel = {
                 headerData.Toko, 
                 headerData.Gate, 
                 headerData.TOK_NAME,
-                fscanValue
+                fscanValue,
+                floadingValue
             ]);
 
             // Insert Details (Optimized Bulk Insert)
@@ -115,13 +117,31 @@ const SortingPoolModel = {
         try {
             await client.query('BEGIN');
 
-            // Update fscanfraction jika headerData tersedia
-            if (headerData && headerData.fscanfraction !== undefined) {
-                const fscanValue = (headerData.fscanfraction === true || headerData.fscanfraction === 'true' || headerData.fscanfraction == 1) ? 1 : 0;
-                await client.query(
-                    `UPDATE sorting_pool_header SET fscanfraction = $1 WHERE nopick = $2`,
-                    [fscanValue, nopick]
-                );
+            // Update fscanfraction dan floading jika headerData tersedia
+            if (headerData) {
+                const updateFields = [];
+                const updateParams = [];
+                let pIdx = 1;
+
+                if (headerData.fscanfraction !== undefined) {
+                    const fscanValue = (headerData.fscanfraction === true || headerData.fscanfraction === 'true' || headerData.fscanfraction == 1) ? 1 : 0;
+                    updateFields.push(`fscanfraction = $${pIdx++}`);
+                    updateParams.push(fscanValue);
+                }
+
+                if (headerData.floading !== undefined) {
+                    const floadingValue = (headerData.floading === true || headerData.floading === 'true' || headerData.floading == 1) ? 1 : 0;
+                    updateFields.push(`floading = $${pIdx++}`);
+                    updateParams.push(floadingValue);
+                }
+
+                if (updateFields.length > 0) {
+                    updateParams.push(nopick);
+                    await client.query(
+                        `UPDATE sorting_pool_header SET ${updateFields.join(', ')} WHERE nopick = $${pIdx}`,
+                        updateParams
+                    );
+                }
             }
 
             if (detailsData && detailsData.length > 0) {
