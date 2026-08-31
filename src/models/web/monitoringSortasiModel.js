@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 
 const { pool } = require("../../config/db");
 
@@ -19,7 +19,8 @@ const MonitoringSortasiModel = {
                 h.updated_at,
                 h.fscanfraction,
                 COUNT(d.dusno) as total_containers,
-                SUM(CASE WHEN d.is_scanned = TRUE THEN 1 ELSE 0 END) as scanned_containers
+                SUM(CASE WHEN d.is_scanned = TRUE THEN 1 ELSE 0 END) as scanned_containers,
+                COALESCE((SELECT SUM(jumlah) FROM sorting_pool_count_log c WHERE c.nopick = h.nopick), 0) as count_sorted_total
             FROM sorting_pool_header h
             LEFT JOIN sorting_pool_detail d ON h.nopick = d.nopick
             WHERE h.tglpic::DATE = $1::DATE
@@ -47,6 +48,23 @@ const MonitoringSortasiModel = {
         const result = await pool.query(sql, [nopick]);
         return result.rows;
     },
+
+    async getCountLogsByNopick(nopick) {
+        if (!nopick) return [];
+
+        const sql = `
+            SELECT 
+                id,
+                jumlah,
+                scanned_at,
+                scanned_by
+            FROM sorting_pool_count_log
+            WHERE nopick = $1
+            ORDER BY scanned_at ASC;
+        `;
+        const result = await pool.query(sql, [nopick]);
+        return result.rows;
+    }
 };
 
 module.exports = MonitoringSortasiModel;

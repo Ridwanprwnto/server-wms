@@ -1,4 +1,4 @@
-// src/controllers/mobile/sortingPoolController.js
+﻿// src/controllers/mobile/sortingPoolController.js
 const SortingPoolModel = require("../../models/mobile/sortingPoolModel");
 
 const SortingPoolController = {
@@ -142,6 +142,44 @@ const SortingPoolController = {
 
         } catch (error) {
             console.error("Error in syncContainers:", error);
+            return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+        }
+    },
+
+    // 4. Scan sejumlah N container sekaligus (count-based sorting)
+    async scanByCount(req, res) {
+        try {
+            const { nopick, count, user } = req.body;
+
+            if (!nopick) {
+                return res.status(400).json({ success: false, message: "nopick is required" });
+            }
+
+            const parsedCount = parseInt(count, 10);
+            if (!parsedCount || parsedCount <= 0 || isNaN(parsedCount)) {
+                return res.status(400).json({ success: false, message: "count must be a positive integer" });
+            }
+
+            const result = await SortingPoolModel.scanByCount(nopick, parsedCount, user);
+
+            if (result === null) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Jumlah input (${parsedCount}) melebihi sisa container yang belum disortir`
+                });
+            }
+
+            // Return progress terbaru agar UI bisa update
+            const progress = await SortingPoolModel.getProgress(nopick);
+
+            return res.status(200).json({
+                success: true,
+                message: `${result.updated} container berhasil disortir`,
+                data: progress
+            });
+
+        } catch (error) {
+            console.error("Error in scanByCount:", error);
             return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
         }
     }
