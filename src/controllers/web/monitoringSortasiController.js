@@ -1,11 +1,4 @@
-"use strict";
-
-const MonitoringSortasiModel = {
-    getAllSortasiProgress: async () => {
-        // Will be overwritten by actual import
-        return [];
-    }
-}; // Fallback if import fails during analysis, normally handled by require
+﻿"use strict";
 
 const RealMonitoringSortasiModel = require("../../models/web/monitoringSortasiModel");
 
@@ -22,17 +15,28 @@ const MonitoringSortasiController = {
 
             const data = await RealMonitoringSortasiModel.getAllSortasiProgress(date);
             
-            // Format progress percentage
+            // Format progress percentage and method
             const formattedData = data.map(item => {
                 const total = parseInt(item.total_containers) || 0;
                 const scanned = parseInt(item.scanned_containers) || 0;
-                const percentage = total === 0 ? 0 : Math.round((scanned / total) * 100);
+                const countSorted = parseInt(item.count_sorted_total) || 0;
+                
+                // Determine which method was used
+                let method = 'scan';
+                if (countSorted > 0 && scanned === 0) {
+                    method = 'count';
+                } else if (countSorted > 0 && scanned > 0) {
+                    method = countSorted >= scanned ? 'count' : 'scan';
+                }
+                const actualProgressVal = method === 'count' ? countSorted : scanned;
+                const percentage = total === 0 ? 0 : Math.round((actualProgressVal / total) * 100);
                 
                 return {
                     ...item,
                     total_containers: total,
-                    scanned_containers: scanned,
-                    progress_percentage: percentage
+                    scanned_containers: actualProgressVal, // override with actual progress based on method
+                    progress_percentage: percentage,
+                    scan_method: method
                 };
             });
 
@@ -59,11 +63,18 @@ const MonitoringSortasiController = {
                 });
             }
 
-            const data = await RealMonitoringSortasiModel.getDetailsByNopick(nopick);
+            const details = await RealMonitoringSortasiModel.getDetailsByNopick(nopick);
+            const countLogs = await RealMonitoringSortasiModel.getCountLogsByNopick(nopick);
             
+            const method = countLogs.length > 0 ? 'count' : 'scan';
+
             return res.status(200).json({
                 status: 'success',
-                data: data
+                data: {
+                    method,
+                    details: details,
+                    countLogs: countLogs
+                }
             });
         } catch (error) {
             console.error('[MonitoringSortasiController.getDetails]', error);

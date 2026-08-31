@@ -19,4 +19,7 @@ sortingPoolRoute.get("/progress/:nopick", SortingPoolController.getProgress);
 // PUT /sync-containers -> Sync data container terbaru dari DPD
 sortingPoolRoute.put("/sync-containers", SortingPoolController.syncContainers);
 
+// PUT /scan-by-count -> Scan sejumlah N container sekaligus (count-based sorting)
+sortingPoolRoute.put("/scan-by-count", SortingPoolController.scanByCount);
+
 module.exports = sortingPoolRoute;
