@@ -83,6 +83,43 @@ const MonitoringSortasiController = {
                 message: 'Internal server error while fetching sorting details'
             });
         }
+    },
+
+    /**
+     * Reset fscanfraction menjadi 0 untuk nopick tertentu.
+     * PUT /main/sortasi/monitoring/:nopick/reset-container
+     */
+    async resetContainer(req, res) {
+        try {
+            const nopick = req.params.nopick;
+            if (!nopick) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'nopick parameter is required'
+                });
+            }
+
+            const result = await RealMonitoringSortasiModel.resetFscanfraction(nopick);
+
+            if (!result) {
+                return res.status(404).json({
+                    status: 'error',
+                    message: `Data dengan nopick "${nopick}" tidak ditemukan`
+                });
+            }
+
+            return res.status(200).json({
+                status: 'success',
+                message: `Status pemakaian container untuk nopick "${nopick}" berhasil direset`,
+                data: result
+            });
+        } catch (error) {
+            console.error('[MonitoringSortasiController.resetContainer]', error);
+            return res.status(500).json({
+                status: 'error',
+                message: 'Internal server error while resetting container status'
+            });
+        }
     }
 };
 

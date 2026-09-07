@@ -64,6 +64,24 @@ const MonitoringSortasiModel = {
         `;
         const result = await pool.query(sql, [nopick]);
         return result.rows;
+    },
+
+    /**
+     * Reset nilai fscanfraction menjadi 0 pada sorting_pool_header berdasarkan nopick.
+     * @param {string} nopick
+     * @returns {object|null} baris yang diupdate
+     */
+    async resetFscanfraction(nopick) {
+        if (!nopick) return null;
+
+        const sql = `
+            UPDATE sorting_pool_header
+            SET fscanfraction = 0
+            WHERE nopick = $1
+            RETURNING nopick, fscanfraction;
+        `;
+        const result = await pool.query(sql, [nopick]);
+        return result.rows[0] || null;
     }
 };
 

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const router = express.Router();
 const MonitoringSortasiController = require('../../../controllers/web/monitoringSortasiController');
 
@@ -7,5 +7,11 @@ const MonitoringSortasiController = require('../../../controllers/web/monitoring
 
 router.get('/', MonitoringSortasiController.getProgress);
 router.get('/:nopick/details', MonitoringSortasiController.getDetails);
+
+/**
+ * Reset status pemakaian container (fscanfraction) menjadi 0.
+ * PUT /main/sortasi/monitoring/:nopick/reset-container
+ */
+router.put('/:nopick/reset-container', MonitoringSortasiController.resetContainer);
 
 module.exports = router;
